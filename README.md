@@ -53,3 +53,5 @@ See `CLAUDE.md` for more detail on architecture and conventions.
 The easiest way to deploy this app is to use the
 [Vercel Platform](https://vercel.com/new). Set `ANTHROPIC_API_KEY`,
 `RESEND_API_KEY`, and `CONTACT_TO_EMAIL` as environment variables there.
+
+## updating test run
