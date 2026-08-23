@@ -21,6 +21,9 @@ generation over his resume and work history.
 - The selected sections are passed to Claude as grounding context, and the model is
   instructed to answer only from them and to cite which sources it used.
 - Responses stream to the browser token-by-token over server-sent events.
+- Every question and answer is logged to a Postgres database, along with the
+  retrieved sources, retrieval latency, and per-turn token/cost accounting —
+  so visitor questions can be reviewed to see what people actually want to know.
 
 ## Stack
 
@@ -29,6 +32,19 @@ generation over his resume and work history.
 - Anthropic Claude via the official TypeScript SDK
 - Streaming over SSE with a custom event envelope, cancellation, and per-turn
   token and cost accounting
+- Neon (serverless Postgres) for logging visitor interactions
+
+## How it was built
+
+- Built with AI-assisted development, using Claude Code as a pair-programming
+  agent for the majority of the implementation — from scaffolding the Next.js
+  app and RAG pipeline to adding the interaction-logging database.
+- Miguel drove the architecture and product decisions (what to build, what
+  tradeoffs to make, what "done" looks like); Claude Code wrote and iterated
+  on the code under that direction.
+- This mirrors how Miguel works day to day: comfortable directing an AI
+  coding agent on real, production-facing work rather than only hand-writing
+  every line.
 
 ## Why
 

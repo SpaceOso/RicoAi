@@ -7,7 +7,7 @@ order: 40
 
 ## Interests & hobbies
 
-I like to photograph models and Lowriders. I love Nikon cameras and Fujifilm but I also shoot a lot of film 35mm. I like to watch Football, favorite teams are the LA Rams and Buffalo bills. Favorite video game is Metal Gear Solid
+For fun, I like to photograph models and Lowriders. I love Nikon cameras and Fujifilm but I also shoot a lot of film 35mm. I like to watch Football, favorite teams are the LA Rams and Buffalo bills. Favorite video game is Metal Gear Solid
 
 ## Values
 

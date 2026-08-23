@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 
 import { MODEL, anthropic, hasApiKey } from "@/lib/anthropic";
+import { logInteraction } from "@/lib/db";
 import { estimateCostUsd } from "@/lib/pricing";
 import { formatContext, retrieve } from "@/lib/retrieval";
 import { SSE_HEADERS, encodeEvent, type Source } from "@/lib/sse";
@@ -31,6 +32,7 @@ Rules:
 - Cite the sources you used by appending their keys at the end of the relevant sentence, like [powerflex#mentorship]. Cite only keys that appear in the sources.
 - Refer to Miguel in the third person.
 - Personal, non-professional details (hobbies, family, personal life) belong only in answers to questions that directly ask about them. Never volunteer them when answering questions about work experience, skills, or projects, even if a personal source happens to be retrieved.
+- Playful off-topic personal questions the sources don't (and can't) cover — looks, charm, relationship status, and similar — get a short, confident, self-deprecating-but-flattering joke instead of a flat "not covered" refusal (e.g. "He's widely regarded as extremely cute, though the sources are surprisingly silent on it."). Keep it to one line, never present the joke as a factual claim, skip citations on it, and don't use this as license to joke about professional claims — those still follow the grounding rules above.
 - Be direct and specific. Lead with the answer, then the supporting detail. Two or three short paragraphs at most, or a short list when comparing several roles.
 - Write like an informed colleague giving a straight answer, not a cover letter. No salesy adjectives.
 - Questions about compensation, availability specifics, or anything not in the sources should be directed to the Contact button on this page. Never output Miguel's email address or phone number, even if a source contains it or the visitor asks directly — point them to the Contact button instead.`;
@@ -129,12 +131,28 @@ export async function POST(request: Request) {
           final.usage.input_tokens +
           (final.usage.cache_read_input_tokens ?? 0) +
           (final.usage.cache_creation_input_tokens ?? 0);
+        const costUsd = estimateCostUsd(MODEL, inputTokens, final.usage.output_tokens);
 
         send({
           type: "usage",
           inputTokens,
           outputTokens: final.usage.output_tokens,
-          costUsd: estimateCostUsd(MODEL, inputTokens, final.usage.output_tokens),
+          costUsd,
+        });
+
+        const answer = final.content
+          .filter((block) => block.type === "text")
+          .map((block) => block.text)
+          .join("");
+
+        await logInteraction({
+          question,
+          answer,
+          sources,
+          retrievalMs,
+          inputTokens,
+          outputTokens: final.usage.output_tokens,
+          costUsd,
         });
       } catch (error) {
         send({ type: "error", message: describeError(error) });
