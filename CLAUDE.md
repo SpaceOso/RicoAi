@@ -15,7 +15,8 @@ npm run dev      # start dev server (Turbopack)
 npm run build    # production build
 npm run start    # run a production build
 npm run lint     # eslint
-npx tsc --noEmit # typecheck (no dedicated test suite exists)
+npm run test     # vitest (lib/ unit tests + API route handler tests, mocked)
+npx tsc --noEmit # typecheck
 ```
 
 Requires `ANTHROPIC_API_KEY` in `.env.local` (copy from `.env.example`); the `/api/ask` route returns a 503 with a descriptive error if it's unset. Contact-form email delivery additionally needs `RESEND_API_KEY` and `CONTACT_TO_EMAIL`.

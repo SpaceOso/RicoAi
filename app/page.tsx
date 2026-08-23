@@ -41,13 +41,6 @@ export default function Home() {
         >
           LinkedIn
         </a>
-        <a
-          href="/resume.pdf"
-          download
-          className="text-sm text-muted hover:text-foreground"
-        >
-          Resume
-        </a>
       </footer>
     </main>
   );
