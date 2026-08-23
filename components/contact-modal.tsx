@@ -58,9 +58,9 @@ export function ContactModal() {
       <dialog
         ref={dialogRef}
         onClose={() => setStatus("idle")}
-        className="w-full max-w-md rounded-2xl border border-border bg-surface p-0 text-foreground shadow-lg backdrop:bg-black/40"
+        className="fixed m-auto max-h-[85vh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-2xl border border-border bg-surface p-0 text-foreground shadow-lg backdrop:bg-black/40"
       >
-        <div className="flex flex-col gap-4 p-6">
+        <div className="flex flex-col gap-4 p-5 sm:p-6">
           <div className="flex items-start justify-between">
             <h2 className="text-base font-semibold">Send a message</h2>
             <button
