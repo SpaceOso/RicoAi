@@ -4,6 +4,7 @@ import { z } from "zod";
 import { MODEL, anthropic, hasApiKey } from "@/lib/anthropic";
 import { logInteraction } from "@/lib/db";
 import { estimateCostUsd } from "@/lib/pricing";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { formatContext, retrieve } from "@/lib/retrieval";
 import { SSE_HEADERS, encodeEvent, type Source } from "@/lib/sse";
 
@@ -45,6 +46,18 @@ export async function POST(request: Request) {
           "ANTHROPIC_API_KEY is not set. Copy .env.example to .env.local and add a key.",
       },
       { status: 503 },
+    );
+  }
+
+  const ip = getClientIp(request);
+  const rateLimit = await checkRateLimit(ip, "ask");
+  if (!rateLimit.allowed) {
+    return Response.json(
+      { error: "Too many requests. Try again shortly." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
     );
   }
 

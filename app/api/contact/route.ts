@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import {
   CONTACT_FROM_EMAIL,
   CONTACT_TO_EMAIL,
@@ -20,6 +21,18 @@ export async function POST(request: Request) {
     return Response.json(
       { error: "Contact form is not configured." },
       { status: 503 },
+    );
+  }
+
+  const ip = getClientIp(request);
+  const rateLimit = await checkRateLimit(ip, "contact");
+  if (!rateLimit.allowed) {
+    return Response.json(
+      { error: "Too many requests. Try again shortly." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      },
     );
   }
 

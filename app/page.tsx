@@ -33,6 +33,21 @@ export default function Home() {
         >
           GitHub
         </a>
+        <a
+          href="https://www.linkedin.com/in/miguelrico/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-muted hover:text-foreground"
+        >
+          LinkedIn
+        </a>
+        <a
+          href="/resume.pdf"
+          download
+          className="text-sm text-muted hover:text-foreground"
+        >
+          Resume
+        </a>
       </footer>
     </main>
   );
