@@ -16,7 +16,7 @@ import matter from "gray-matter";
 export type DocMeta = {
   id: string;
   title: string;
-  kind: "profile" | "experience" | "project" | "skills" | "education";
+  kind: "profile" | "experience" | "project" | "skills" | "education" | "personal";
   org?: string;
   role?: string;
   period?: string;

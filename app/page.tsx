@@ -1,4 +1,5 @@
 import { AskPanel } from "@/components/ask-panel";
+import { ContactModal } from "@/components/contact-modal";
 
 const SUGGESTIONS = [
   "What has Miguel built with React and TypeScript?",
@@ -22,10 +23,8 @@ export default function Home() {
 
       <AskPanel suggestions={SUGGESTIONS} />
 
-      <footer className="border-t border-border pt-6 text-sm text-muted">
-        <a href="mailto:miguelricodev@gmail.com" className="hover:text-foreground">
-          miguelricodev@gmail.com
-        </a>
+      <footer className="border-t border-border pt-6">
+        <ContactModal />
       </footer>
     </main>
   );
