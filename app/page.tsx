@@ -23,8 +23,16 @@ export default function Home() {
 
       <AskPanel suggestions={SUGGESTIONS} />
 
-      <footer className="border-t border-border pt-6">
+      <footer className="flex items-center gap-4 border-t border-border pt-6">
         <ContactModal />
+        <a
+          href="https://github.com/SpaceOso/RicoAi"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-muted hover:text-foreground"
+        >
+          GitHub
+        </a>
       </footer>
     </main>
   );
