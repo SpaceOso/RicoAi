@@ -26,8 +26,31 @@ export function AskPanel({ suggestions }: { suggestions: string[] }) {
   }
 
   return (
-    <section className="rounded-2xl border border-border bg-surface shadow-sm">
-      <div className="flex flex-col gap-5 p-5 sm:p-6">
+    <section className="flex h-[min(70vh,640px)] flex-col rounded-2xl border border-border bg-surface shadow-sm">
+      <div className="flex-1 overflow-y-auto p-5 sm:p-6">
+        {turns.length === 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {suggestions.map((s) => (
+              <button
+                key={s}
+                onClick={() => submit(s)}
+                className="rounded-full border border-border px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-foreground"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-7">
+            {turns.map((turn) => (
+              <TurnView key={turn.id} turn={turn} isStreaming={isStreaming} />
+            ))}
+            <div ref={endRef} />
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2 border-t border-border p-5 sm:p-6">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -52,31 +75,13 @@ export function AskPanel({ suggestions }: { suggestions: string[] }) {
           </button>
         </form>
 
-        {turns.length === 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {suggestions.map((s) => (
-              <button
-                key={s}
-                onClick={() => submit(s)}
-                className="rounded-full border border-border px-3 py-1.5 text-xs text-muted transition-colors hover:border-accent hover:text-foreground"
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-7">
-            {turns.map((turn) => (
-              <TurnView key={turn.id} turn={turn} isStreaming={isStreaming} />
-            ))}
-            <div ref={endRef} />
-            <button
-              onClick={reset}
-              className="self-start text-xs text-muted hover:text-foreground"
-            >
-              Start over
-            </button>
-          </div>
+        {turns.length > 0 && (
+          <button
+            onClick={reset}
+            className="self-start text-xs text-muted hover:text-foreground"
+          >
+            Start over
+          </button>
         )}
       </div>
     </section>
