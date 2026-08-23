@@ -180,12 +180,22 @@ function RetrievalTrace({
   );
 }
 
+/** Digits as Unicode superscripts — react-markdown escapes raw HTML like <sup>, so this renders as plain text instead. */
+const SUPERSCRIPT_DIGITS = ["⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"];
+
+function toSuperscript(n: number): string {
+  return String(n)
+    .split("")
+    .map((digit) => SUPERSCRIPT_DIGITS[Number(digit)])
+    .join("");
+}
+
 function numberCitations(text: string): { body: string; cited: string[] } {
   const cited: string[] = [];
   const body = text.replace(CITATION, (match, key: string) => {
     if (!key.includes("#") && !key.includes("-")) return match;
     if (!cited.includes(key)) cited.push(key);
-    return `<sup>[${cited.indexOf(key) + 1}]</sup>`;
+    return toSuperscript(cited.indexOf(key) + 1);
   });
   return { body, cited };
 }
