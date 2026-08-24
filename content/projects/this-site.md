@@ -16,23 +16,29 @@ generation over his resume and work history.
 ## How it works
 
 - Content lives as Markdown files in `content/`, split into sections at build time.
-- A retrieval layer scores those sections against the visitor's question and
-  selects the relevant ones.
+- Each section is embedded (Voyage AI) and stored in Postgres via pgvector.
+  A visitor's question is embedded the same way and matched against those
+  sections by cosine similarity, so paraphrased or loosely worded questions
+  still find the right material, not just exact keyword matches.
 - The selected sections are passed to Claude as grounding context, and the model is
   instructed to answer only from them and to cite which sources it used.
 - Responses stream to the browser token-by-token over server-sent events.
 - Every question and answer is logged to a Postgres database, along with the
   retrieved sources, retrieval latency, and per-turn token/cost accounting —
   so visitor questions can be reviewed to see what people actually want to know.
+- Both the chat and the contact form are rate-limited per visitor to keep the
+  underlying AI and email APIs from being abused.
 
 ## Stack
 
 - Next.js (App Router) with React and TypeScript
 - Tailwind CSS
 - Anthropic Claude via the official TypeScript SDK
+- Voyage AI embeddings + pgvector for semantic retrieval
 - Streaming over SSE with a custom event envelope, cancellation, and per-turn
   token and cost accounting
-- Neon (serverless Postgres) for logging visitor interactions
+- Neon (serverless Postgres) for chunk embeddings, interaction logging, and
+  rate limiting
 
 ## How it was built
 

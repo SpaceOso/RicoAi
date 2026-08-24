@@ -26,7 +26,7 @@ export function AskPanel({ suggestions }: { suggestions: string[] }) {
   }
 
   return (
-    <section className="flex h-[min(70vh,640px)] flex-col rounded-2xl border border-border bg-surface shadow-sm">
+    <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border bg-surface shadow-sm">
       <div className="flex-1 overflow-y-auto p-5 sm:p-6">
         {turns.length === 0 ? (
           <div className="flex flex-wrap gap-2">
