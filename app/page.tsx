@@ -11,19 +11,22 @@ const SUGGESTIONS = [
 
 export default function Home() {
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-col gap-10 px-6 py-16 sm:py-24">
-      <header className="flex flex-col gap-3">
+    <main className="mx-auto flex h-dvh w-full max-w-2xl flex-col gap-4 px-6 py-6 sm:py-8">
+      <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight">Miguel Rico</h1>
-        <p className="text-muted">
-          Full-stack software engineer — 12+ years across clean energy, edtech,
-          healthcare, and games. Ask the assistant below about his experience,
-          projects, or skills.
+        <p className="text-sm text-muted">
+          Full-stack software engineer — 12+ years shipping and owning features
+          end-to-end across clean energy, edtech, healthcare, and games.
+          He&apos;s led front-end architecture on large-scale platforms and
+          mentored engineers along the way, driven by a simple goal: build
+          software that actually helps people. Ask the assistant below about his
+          experience, projects, or skills.
         </p>
       </header>
 
       <AskPanel suggestions={SUGGESTIONS} />
 
-      <footer className="flex items-center gap-4 border-t border-border pt-6">
+      <footer className="flex items-center gap-4 border-t border-border pt-4">
         <ContactModal />
         <a
           href="https://github.com/SpaceOso/RicoAi"

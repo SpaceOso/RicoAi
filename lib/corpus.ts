@@ -94,7 +94,8 @@ function splitIntoChunks(body: string, meta: DocMeta): Chunk[] {
 function loadDocs(): Doc[] {
   return listMarkdownFiles(CONTENT_DIR)
     .map((file) => {
-      const { data, content } = matter(fs.readFileSync(file, "utf8"));
+      const raw = fs.readFileSync(file, "utf8").replace(/\r\n/g, "\n");
+      const { data, content } = matter(raw);
       const meta = data as DocMeta;
       return {
         ...meta,

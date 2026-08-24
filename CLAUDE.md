@@ -16,10 +16,11 @@ npm run build    # production build
 npm run start    # run a production build
 npm run lint     # eslint
 npm run test     # vitest (lib/ unit tests + API route handler tests, mocked)
+npm run embed    # re-embed content/*.md into Postgres; run after any content change
 npx tsc --noEmit # typecheck
 ```
 
-Requires `ANTHROPIC_API_KEY` in `.env.local` (copy from `.env.example`); the `/api/ask` route returns a 503 with a descriptive error if it's unset. Contact-form email delivery additionally needs `RESEND_API_KEY` and `CONTACT_TO_EMAIL`.
+Requires `ANTHROPIC_API_KEY`, `DATABASE_URL` (Neon Postgres), and `VOYAGE_API_KEY` in `.env.local` (copy from `.env.example`); the `/api/ask` route returns a 503 with a descriptive error if any is unset — retrieval reads from Postgres, so the DB isn't optional anymore. Contact-form email delivery additionally needs `RESEND_API_KEY` and `CONTACT_TO_EMAIL`.
 
 ## Architecture: the RAG pipeline
 
@@ -27,7 +28,7 @@ This is the flow to understand before touching retrieval, prompting, or content:
 
 1. **`content/*.md`** — one Markdown file per source document (a role, a project, skills, education), with YAML frontmatter matching `DocMeta` in `lib/corpus.ts` (`id`, `title`, `kind`, `org`, `role`, `period`, `order`, ...).
 2. **`lib/corpus.ts`** loads every file under `content/` once per server process and splits each on `##` headings into `Chunk`s — the retrievable unit. Chunk `id`s (e.g. `powerflex#mentorship`) double as citation keys.
-3. **`lib/retrieval.ts`** (`retrieve(query)`) scores chunks against the query with BM25 and returns the top matches above a relative-score cutoff. This is a deliberate choice, not a placeholder for embeddings — see the file's header comment before changing the ranking approach.
+3. **`lib/retrieval.ts`** (`retrieve(query)`) embeds the query with Voyage AI and does a cosine-similarity lookup against chunk embeddings stored in Postgres (pgvector, via `lib/embeddings.ts`), returning the top matches above a relative-score cutoff. Chunk embeddings are precomputed offline by `scripts/embed-corpus.ts` (`npm run embed`) — run it whenever `content/*.md` changes, since retrieval reads only from the stored embeddings, not the corpus directly.
 4. **`app/api/ask/route.ts`** is the only place that talks to Claude. It retrieves chunks, formats them into a `<sources>` block (`formatContext`), appends that to the *last* user turn (not the system prompt, to preserve prompt-cache hits on `SYSTEM_PROMPT` across a conversation), and streams the response back as custom SSE events (`lib/sse.ts`: `sources`, `thinking`, `text`, `usage`, `error`, `done`).
 5. **`lib/use-ask.ts`** (client hook) drives the fetch/stream loop; **`components/ask-panel.tsx`** renders turns, retrieval traces, citations, and per-turn cost/latency from the `usage` event.
 

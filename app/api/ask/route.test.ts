@@ -28,6 +28,10 @@ vi.mock("@/lib/db", () => ({
   logInteraction: logInteractionMock,
 }));
 
+vi.mock("@/lib/voyage", () => ({
+  hasVoyageKey: () => true,
+}));
+
 const SAMPLE_CHUNK = {
   id: "powerflex#mentorship",
   docId: "powerflex",
@@ -83,7 +87,7 @@ beforeEach(async () => {
   vi.clearAllMocks();
   hasApiKeyMock.mockReturnValue(true);
   checkRateLimitMock.mockResolvedValue({ allowed: true });
-  retrieveMock.mockReturnValue([SAMPLE_CHUNK]);
+  retrieveMock.mockResolvedValue([SAMPLE_CHUNK]);
   streamMock.mockReturnValue(
     fakeStream(["Hello ", "world"], defaultFinalMessage()),
   );
@@ -152,7 +156,7 @@ describe("POST /api/ask", () => {
   });
 
   it("still responds when retrieval finds no sources", async () => {
-    retrieveMock.mockReturnValue([]);
+    retrieveMock.mockResolvedValue([]);
     const res = await post({
       messages: [{ role: "user", content: "does not matter" }],
     });
@@ -160,6 +164,18 @@ describe("POST /api/ask", () => {
     expect(events.find((e) => e.type === "sources")).toMatchObject({
       sources: [],
     });
+  });
+
+  it("still responds when retrieval itself throws (fails open)", async () => {
+    retrieveMock.mockRejectedValue(new Error("voyage down"));
+    const res = await post({
+      messages: [{ role: "user", content: "does not matter" }],
+    });
+    const events = await collectEvents(res);
+    expect(events.find((e) => e.type === "sources")).toMatchObject({
+      sources: [],
+    });
+    expect(events.find((e) => e.type === "error")).toBeUndefined();
   });
 
   it("emits an error event when Claude refuses", async () => {
@@ -194,6 +210,32 @@ describe("POST /api/ask when unconfigured", () => {
       hasApiKey: () => false,
       anthropic: { beta: { messages: { stream: streamMock } } },
     }));
+    vi.doMock("@/lib/rate-limit", () => ({
+      getClientIp: () => "1.2.3.4",
+      checkRateLimit: checkRateLimitMock,
+    }));
+
+    const { POST: unconfiguredPost } = await import("./route");
+    const res = await unconfiguredPost(
+      new Request("http://localhost/api/ask", {
+        method: "POST",
+        body: JSON.stringify({ messages: [{ role: "user", content: "hi" }] }),
+      }),
+    );
+
+    expect(res.status).toBe(503);
+    expect(checkRateLimitMock).not.toHaveBeenCalled();
+    expect(streamMock).not.toHaveBeenCalled();
+  });
+
+  it("returns 503 when Voyage is unconfigured, even if Anthropic is fine", async () => {
+    vi.resetModules();
+    vi.doMock("@/lib/anthropic", () => ({
+      MODEL: "claude-sonnet-5",
+      hasApiKey: () => true,
+      anthropic: { beta: { messages: { stream: streamMock } } },
+    }));
+    vi.doMock("@/lib/voyage", () => ({ hasVoyageKey: () => false }));
     vi.doMock("@/lib/rate-limit", () => ({
       getClientIp: () => "1.2.3.4",
       checkRateLimit: checkRateLimitMock,
